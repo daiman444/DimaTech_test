@@ -43,5 +43,6 @@ class PgSettings(BaseSettings):
 
 appsettings = AppSettings()
 logger.info("AppStiings created")
+
 pgsettings = PgSettings()
 logger.info("PgSettings created")
