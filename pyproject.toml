@@ -1,0 +1,12 @@
+[project]
+name = "dimatech-test"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.14.1",
+    "fastapi>=0.115.11",
+    "pydantic-settings>=2.8.1",
+    "sqlalchemy>=2.0.38",
+]
