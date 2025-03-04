@@ -14,6 +14,13 @@ class AppSettings(BaseSettings):
     HASH_SALT: str
 
 
+class OAuthSettings(BaseSettings):
+    OAUTH_SECRET_KEY: str
+    OAUTH_ALGORITHM: str
+    OAUTH_TOKEN_EXPIRE: int
+    OAUTH_TOKEN_URL: str
+
+
 class PgSettings(BaseSettings):
     POSTGRES_DRV: str
     POSTGRES_USER: str
@@ -43,6 +50,9 @@ class PgSettings(BaseSettings):
 
 appsettings = AppSettings()
 logger.info("AppStiings created")
+
+oauth_settings = OAuthSettings()
+logger.info("OAuthSettings created")
 
 pgsettings = PgSettings()
 logger.info("PgSettings created")

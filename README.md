@@ -14,6 +14,8 @@ HASH_SALT генерируется модулем __os__:
 
     salt = os.urandom(16).hex()
 
+OAUTH_SECRET_KEY получен аналогично HASH_SALT
+
 
 # Running an Application without Docker
 ## Dependencies
