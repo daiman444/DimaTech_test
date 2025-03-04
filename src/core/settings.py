@@ -11,7 +11,7 @@ logger = logging.getLogger("SETTINGS")
 
 
 class AppSettings(BaseSettings):
-    ...
+    HASH_SALT: str
 
 
 class PgSettings(BaseSettings):
