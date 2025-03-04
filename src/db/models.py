@@ -16,18 +16,18 @@ from db.base import Base
 class User(Base):
     name: Mapped[str] = mapped_column(
         String(32),
-        nullable=False,
+        nullable=True,
     )
     last_name: Mapped[str] = mapped_column(
         String(32),
-        nullable=False,
+        nullable=True,
     )
     email: Mapped[str] = mapped_column(
         String(64),
         nullable=False,
         unique=True,
     )
-    pass_hash: Mapped[str] = mapped_column(
+    password: Mapped[str] = mapped_column(
         String(64),
         nullable=False
     )
@@ -39,15 +39,17 @@ class User(Base):
     # relations
     invoices: Mapped[list["Invoice"]] = relationship(
         back_populates="user",
-        cascade="all, delete",
+        cascade="all, delete, delete-orphan",
     )
 
 
 class Invoice(Base):
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"),
-        onupdate="CASCADE",
-        ondelete="CASCADE",
+        ForeignKey(
+            "users.id",
+            onupdate="CASCADE",
+            ondelete="CASCADE",
+        ),
     )
     balance: Mapped[int] = mapped_column(
         Integer,
@@ -60,15 +62,17 @@ class Invoice(Base):
     )
     payments: Mapped[list["Payment"]] = relationship(
         back_populates="invoice",
-        cascade="all, delete",
+        cascade="all, delete, delete-orphan",
     )
 
 
 class Payment(Base):
     invoice_id: Mapped[int] = mapped_column(
-        ForeignKey("invoices.id"),
-        onupdate="CASCADE",
-        ondelete="CASCADE",
+        ForeignKey(
+            "invoices.id",
+            onupdate="CASCADE",
+            ondelete="CASCADE",
+        )
     )
     amount: Mapped[int] = mapped_column(
         Integer,
@@ -76,6 +80,6 @@ class Payment(Base):
     )
 
     # relations
-    invoices: Mapped["Invoice"] = relationship(
+    invoice: Mapped["Invoice"] = relationship(
         back_populates="payments",
     )
