@@ -6,6 +6,6 @@ class UserAuth(BaseModel):
     password: str
 
 
-class TokenResponse(BaseModel):
+class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
