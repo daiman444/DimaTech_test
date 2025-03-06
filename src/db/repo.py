@@ -24,11 +24,22 @@ class UserRepo:
     @staticmethod
     async def get_user(
         session: AsyncSession,
-        user: UserAuth,
+        auth_user: UserAuth,
     ) -> User:
         result = await session.execute(
             select(User).where(
-                User.email == user.email
+                User.email == auth_user.email
             )
         )
         return result.scalars().first()
+    
+    @staticmethod
+    async def get_users(
+        session: AsyncSession,
+    ) -> list[User]:
+        result = await session.execute(
+            select(User).where(
+                User.is_admin.is_(False),
+                )
+            )
+        return result.scalars().all()

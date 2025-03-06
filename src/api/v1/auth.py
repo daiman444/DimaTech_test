@@ -4,35 +4,35 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import async_session
 from services.auth import AuthService
-from schemas.auth import UserAuth, TokenResponse
+from schemas.auth import UserAuth, Token
 
 auth_router = APIRouter()
 
 
 @auth_router.post(
     path="/signup",
-    response_model=TokenResponse,
+    response_model=Token,
 )
-async def register_user(
+async def signup(
     user_data: UserAuth,
     session: AsyncSession =  Depends(async_session),
-) -> TokenResponse:
-    token = await AuthService.register_user(
+) -> Token:
+    token = await AuthService.signup(
         session=session,
-        user=user_data
+        user_data=user_data
     )
-    return TokenResponse(access_token=token)
+    return Token(access_token=token)
 
 @auth_router.post(
     path="/signin",
-    response_model=TokenResponse,
+    response_model=Token,
 )
-async def auth_user(
-    user_data: UserAuth,
-    session: AsyncSession =  Depends(async_session),
-) -> TokenResponse:
-    token = await AuthService.auth_user(
+async def signin(
+    user_auth: UserAuth,
+    session: AsyncSession = Depends(async_session),
+) -> Token:
+    token = await AuthService.signin(
         session=session,
-        user=user_data
+        user_auth=user_auth
     )
-    return TokenResponse(access_token=token)
+    return Token(access_token=token)
