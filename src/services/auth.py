@@ -20,12 +20,12 @@ class AuthService:
     @ staticmethod
     async def signup(
         session: AsyncSession,
-        user: UserAuth
+        user_data: UserAuth
     ) -> str:
-        user.password = pass_hash.pass_hash(user.password)
+        user_data.password = pass_hash.pass_hash(user_data.password)
         new_user = await UserRepo.add_user(
             session=session,
-            user=user
+            user=user_data
         )
         return await AuthService.create_access_token(
             data={
@@ -36,15 +36,15 @@ class AuthService:
 
     @staticmethod
     async def signin(
+        user_auth: UserAuth,
         session: AsyncSession,
-        user: UserAuth,
     ) -> str:
         user_data = await UserRepo.get_user(
             session=session,
-            user=user,
+            auth_user=user_auth,
         )
         check_passwd = pass_hash.pass_check(
-            password=user.password,
+            password=user_auth.password,
             password_hash=user_data.password
         )
         if check_passwd:

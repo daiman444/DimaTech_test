@@ -5,7 +5,7 @@ from fastapi.security import(
 )
 
 from core.settings import oauth_settings
-from schemas.user_schemas import UserSchema, AdminSchema
+from schemas.user_schemas import UserSchema
 
 
 class OAuth:
@@ -36,13 +36,13 @@ class OAuth:
     async def decode_token(
         self,
         token: str
-    ) -> UserSchema | AdminSchema:
-        user_data = jwt.decode(
+    ) -> UserSchema:
+        user_data: dict = jwt.decode(
             jwt=token,
             key=self.secret_key,
             algorithms=[self.algorithm],
         )
-        return user_data
+        return UserSchema(**user_data)
 
 oauth = OAuth(
     secret_key=oauth_settings.OAUTH_SECRET_KEY,

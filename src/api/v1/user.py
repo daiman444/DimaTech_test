@@ -1,23 +1,49 @@
-from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, Security, Depends
+from fastapi.security import(
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+)
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.oauth import oauth
 from db.session import async_session
 from services.user import UserService
-from schemas.auth import Token
-from src.schemas.user_schemas import UserSchema, AdminSchema
-
+from schemas.user_schemas import UserSchema, UsersSchema
 
 user_router = APIRouter()
+security = HTTPBearer()
 
 
 @user_router.get(
     path="/get_user",
-    response_model=UserSchema | AdminSchema,
+    response_model=UserSchema,
 )
 async def get_user(
-    user: UserSchema | AdminSchema = Depends(oauth.decode_token),
-) -> UserSchema | AdminSchema:
-    return user
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    session: AsyncSession = Depends(async_session),
+) -> UserSchema:
+    token = credentials.credentials
+    user_data: UserSchema = await UserService.get_user(
+        token=token,
+        session=session
+    )
+    return user_data
+
+@user_router.get(
+    path="/get_users",
+    response_model=UsersSchema,
+)
+async def get_users(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    session: AsyncSession = Depends(async_session),
+) -> UsersSchema:
+    token = credentials.credentials
+    user_data: UserSchema = await UserService.get_user(
+        token=token,
+        session=session
+    )
+    if user_data.is_admin:
+        users_list = await UserService.get_users(
+            session=session,
+        )
+        return users_list
