@@ -10,6 +10,8 @@ class UserSchema(BaseModel):
     email: EmailStr
     is_admin: bool | None = None
 
+    invoices: list[int] | None = None
+
     model_config = {
         "from_attributes": True
     }

@@ -1,3 +1,5 @@
+from fastapi.security import HTTPBearer
+
 from pydantic import(
     PostgresDsn,
     field_validator,
@@ -47,6 +49,8 @@ class PgSettings(BaseSettings):
         }
         return PostgresDsn.build(**url_data)
     
+security = HTTPBearer()
+logger.info("HTTPBearer created")    
 
 appsettings = AppSettings()
 logger.info("AppStiings created")
