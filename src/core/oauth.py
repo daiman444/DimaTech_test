@@ -1,8 +1,11 @@
 import jwt
 
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import(
+    OAuth2PasswordBearer,
+)
 
 from core.settings import oauth_settings
+from schemas.user_schemas import UserSchema, AdminSchema
 
 
 class OAuth:
@@ -32,13 +35,14 @@ class OAuth:
     
     async def decode_token(
         self,
-        token: str,
-    ) -> dict:
-        return jwt.decode(
+        token: str
+    ) -> UserSchema | AdminSchema:
+        user_data = jwt.decode(
             jwt=token,
             key=self.secret_key,
             algorithms=[self.algorithm],
         )
+        return user_data
 
 oauth = OAuth(
     secret_key=oauth_settings.OAUTH_SECRET_KEY,

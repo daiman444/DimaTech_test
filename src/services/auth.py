@@ -8,7 +8,6 @@ from db.repo import UserRepo
 from schemas.auth import UserAuth
 
 
-
 class AuthService:
     @staticmethod
     async def create_access_token(
@@ -19,7 +18,7 @@ class AuthService:
         return await oauth.encode_token(data=data)
 
     @ staticmethod
-    async def register_user(
+    async def signup(
         session: AsyncSession,
         user: UserAuth
     ) -> str:
@@ -36,7 +35,7 @@ class AuthService:
         )
 
     @staticmethod
-    async def auth_user(
+    async def signin(
         session: AsyncSession,
         user: UserAuth,
     ) -> str:

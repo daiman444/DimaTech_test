@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordBearer
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,8 +18,6 @@ user_router = APIRouter()
     response_model=UserSchema | AdminSchema,
 )
 async def get_user(
-    token: Token,
-    session: AsyncSession,
+    user: UserSchema | AdminSchema = Depends(oauth.decode_token),
 ) -> UserSchema | AdminSchema:
-    user_data = 
-
+    return user
