@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.settings import security
 from db.session import async_session
 from services.user import UserService
-from schemas.user_schemas import UserSchema, UserSchemaInvoices, UsersSchema
+from schemas.user_schemas import UserSchemaInvoices, UsersSchema
 
 user_router = APIRouter()
 

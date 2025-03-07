@@ -14,6 +14,7 @@ logger = logging.getLogger("SETTINGS")
 
 class AppSettings(BaseSettings):
     HASH_SALT: str
+    WEBHOOK_SECRET_KEY: str
 
 
 class OAuthSettings(BaseSettings):
