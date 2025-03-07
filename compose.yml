@@ -19,7 +19,9 @@ services:
     networks:
       - d_network
     command: 
-      sh -c "uv run uvicorn --factory main:create_app --host 0.0.0.0 --port 8000"
+      sh -c "uv run alembic upgrade head;
+      cd src/;
+      uv run uvicorn --factory main:create_app --host 0.0.0.0 --port 8000"
   
   db:
     image: postgres:17-alpine3.20
