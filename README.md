@@ -2,6 +2,14 @@
 
 # Comments for task
 
+почта и пароль для моковых пользователей:
+
+    user@example.com
+    string
+
+    1user@example.com
+    string
+
 В задании указаны разные сущности для *User* и *Admin*. Но эти сущности 
 имеют одниаковую авторизацию поэтому они объединены в одну таблицу User 
 и различаются лишь флагом "is_admin".
@@ -29,9 +37,9 @@ Run Postgres(from system installig or from docker)
 
 Change variables in .env for correct connection to Posgres
 
-Run MakeFile
 
-    $ make run_app
+    alembic upgrade head
+    uvicorn --factory main:create_app --host 0.0.0.0 --port 8000
 
 # Running an Application with Docker
 
