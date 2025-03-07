@@ -2,25 +2,25 @@ from fastapi import Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.oauth import oauth
 from db.models import User
 from db.repo import UserRepo
 from db.session import async_session
-from schemas.auth import Token
 from schemas.user_schemas import UserSchema, UsersSchema
 
 
 class UserService:
     @staticmethod
     async def get_user(
-        token: Token,
+        user_id: int,
         session: AsyncSession = Depends(async_session),
     ):
-        auth_user = await oauth.decode_token(token=token)
         user: User = await UserRepo.get_user(
             session=session,
-            auth_user=auth_user,
+            user_id=user_id,
         )
+        if user.invoices:
+            user.invoices = [invoice.id for invoice in user.invoices]
+
         return UserSchema.model_validate(user)
     
     async def get_users(

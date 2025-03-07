@@ -1,46 +1,53 @@
-from fastapi import APIRouter, Security, Depends
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends, Request, HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import security
 from db.session import async_session
 from services.user import UserService
-from schemas.user_schemas import UserSchema, UsersSchema
+from schemas.user_schemas import UserSchema, UserSchemaInvoices, UsersSchema
 
 user_router = APIRouter()
 
 
 @user_router.get(
     path="/get_user",
-    response_model=UserSchema,
+    dependencies=[Depends(security)],
+    response_model=UserSchemaInvoices,
 )
 async def get_user(
-    credentials: HTTPAuthorizationCredentials = Security(security),
+    requset: Request,
+    user_id: int | None = None,
     session: AsyncSession = Depends(async_session),
-) -> UserSchema:
-    token = credentials.credentials
-    user_data: UserSchema = await UserService.get_user(
-        token=token,
+) -> UserSchemaInvoices:
+    if user_id is None:
+        user_id = requset.state.user.get("id")
+    if  not requset.state.user.get("is_admin"):
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden"
+        )
+    user_data: UserSchemaInvoices = await UserService.get_user(
+        user_id=user_id,
         session=session
     )
     return user_data
 
 @user_router.get(
     path="/get_users",
+    dependencies=[Depends(security)],
     response_model=UsersSchema,
 )
 async def get_users(
-    credentials: HTTPAuthorizationCredentials = Security(security),
+    request: Request,
     session: AsyncSession = Depends(async_session),
 ) -> UsersSchema:
-    token = credentials.credentials
-    user_data: UserSchema = await UserService.get_user(
-        token=token,
-        session=session
-    )
-    if user_data.is_admin:
-        users_list = await UserService.get_users(
-            session=session,
+    if not request.state.user.get("is_admin"):
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden"
         )
-        return users_list
+    users_list = await UserService.get_users(
+        session=session,
+    )
+    return users_list

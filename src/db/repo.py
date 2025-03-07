@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from schemas.auth import UserAuth
 
@@ -22,17 +23,32 @@ class UserRepo:
         return user
     
     @staticmethod
-    async def get_user(
+    async def get_user_auth(
         session: AsyncSession,
-        auth_user: UserAuth,
+        user_auth = UserAuth
     ) -> User:
         result = await session.execute(
-            select(User).where(
-                User.email == auth_user.email
+            select(User)
+            .where(
+                User.email == user_auth.email
             )
         )
         return result.scalars().first()
-    
+
+    @staticmethod
+    async def get_user(
+        session: AsyncSession,
+        user_id: int,
+    ) -> User:
+        result = await session.execute(
+            select(User)
+            .options(selectinload(User.invoices))
+            .where(
+                User.id == user_id
+            )
+        )
+        return result.scalars().first()
+
     @staticmethod
     async def get_users(
         session: AsyncSession,

@@ -1,22 +1,13 @@
-from datetime import datetime, timedelta
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.oauth import oauth
 from core.pass_hash import pass_hash
 from db.repo import UserRepo
 from schemas.auth import UserAuth
+from schemas.user_schemas import UserSchema
 
 
 class AuthService:
-    @staticmethod
-    async def create_access_token(
-        data: dict,
-    ) -> str:
-        expire = datetime.now() + timedelta(minutes=oauth.token_expire)
-        data.update({"exp": expire})
-        return await oauth.encode_token(data=data)
-
     @ staticmethod
     async def signup(
         session: AsyncSession,
@@ -27,30 +18,26 @@ class AuthService:
             session=session,
             user=user_data
         )
-        return await AuthService.create_access_token(
-            data={
-                "id": new_user.id,
-                "email": new_user.email,
-            }
+        user_auth = UserSchema.model_validate(new_user)
+        return await oauth.encode_token(
+            data=user_auth.__dict__
         )
 
     @staticmethod
     async def signin(
-        user_auth: UserAuth,
         session: AsyncSession,
+        user_auth: UserAuth,
     ) -> str:
-        user_data = await UserRepo.get_user(
+        user_data = await UserRepo.get_user_auth(
             session=session,
-            auth_user=user_auth,
+            user_auth=user_auth,
         )
         check_passwd = pass_hash.pass_check(
             password=user_auth.password,
             password_hash=user_data.password
         )
         if check_passwd:
-            return await AuthService.create_access_token(
-                data={
-                    "id": user_data.id,
-                    "email": user_data.email
-                }
+            user_auth = UserSchema.model_validate(user_data)
+            return await oauth.encode_token(
+                data=user_auth.__dict__
             )
