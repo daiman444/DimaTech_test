@@ -3,7 +3,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import User
-from db.repo import UserRepo
+from db.repo.user import UserRepo
 from db.session import async_session
 from schemas.user_schemas import UserSchema, UsersSchema
 

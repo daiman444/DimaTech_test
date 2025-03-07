@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from api.v1.auth import auth_router
 from api.v1.user import user_router
+from api.v1.invoice import invoice_router
 from core.app_logging import logging
 from middlewares.auth import AuthMiddleware
 
@@ -20,6 +21,10 @@ def create_app():
     app.include_router(
         router=user_router,
         prefix="/api/user"
+    )
+    app.include_router(
+        router=invoice_router,
+        prefix="/api/invoice"
     )
 
     logger.info("Created App")
