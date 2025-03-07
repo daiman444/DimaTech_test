@@ -12,7 +12,7 @@ user_router = APIRouter()
 
 
 @user_router.get(
-    path="/get_user",
+    path="/get_invoices",
     response_model=UserSchema,
 )
 async def get_user(
@@ -27,7 +27,7 @@ async def get_user(
     return user_data
 
 @user_router.get(
-    path="/get_users",
+    path="/get_invoiceses",
     response_model=UsersSchema,
 )
 async def get_users(
