@@ -1,46 +1,81 @@
-from fastapi import APIRouter, Security, Depends
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import(
+    APIRouter,
+    Depends,
+    Request,
+    HTTPException,
+)
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import security
 from db.session import async_session
-from services.user import UserService
-from schemas.user_schemas import UserSchema, UsersSchema
 
-user_router = APIRouter()
-
-
-@user_router.get(
-    path="/get_invoices",
-    response_model=UserSchema,
+from schemas.invoices_schemas import(
+    InvoiceSchema,
+    InvoicesSchema,
+    InvoiceWithPaymentsSchema,
 )
-async def get_user(
-    credentials: HTTPAuthorizationCredentials = Security(security),
-    session: AsyncSession = Depends(async_session),
-) -> UserSchema:
-    token = credentials.credentials
-    user_data: UserSchema = await UserService.get_user(
-        token=token,
-        session=session
-    )
-    return user_data
+from services.invoice import InvoiceService
 
-@user_router.get(
-    path="/get_invoiceses",
-    response_model=UsersSchema,
+invoice_router = APIRouter()
+
+async def chec_user_id(
+    request: Request,
+    user_id: int | None = None,
+) -> int:
+    if user_id is None:
+        user_id = request.state.user.get("id")
+    if user_id != request.state.user.get("id"):
+        if not request.state.user.get("is_admin"):
+            raise HTTPException(
+                status_code=403,
+                detail="Forbidden"
+            )
+    return user_id
+
+@invoice_router.get(
+    path="/add_invoice",
+    dependencies=[Depends(security)],
+    response_model=InvoiceSchema,
 )
-async def get_users(
-    credentials: HTTPAuthorizationCredentials = Security(security),
+async def add_invoice(
+    user_id: int = Depends(chec_user_id),
     session: AsyncSession = Depends(async_session),
-) -> UsersSchema:
-    token = credentials.credentials
-    user_data: UserSchema = await UserService.get_user(
-        token=token,
-        session=session
+) -> InvoiceSchema:
+    invoice = await InvoiceService.add_invoice(
+        user_id=user_id,
+        session=session,
     )
-    if user_data.is_admin:
-        users_list = await UserService.get_users(
+    return invoice
+
+@invoice_router.get(
+    path="/get_invoice",
+    dependencies=[Depends(security)],
+    response_model=InvoiceWithPaymentsSchema,
+)
+async def get_invoice(
+    invoice_id: int,
+    user_id: int = Depends(chec_user_id),
+    session: AsyncSession = Depends(async_session),
+) -> InvoiceWithPaymentsSchema:
+    if user_id:
+        invoice = await InvoiceService.get_invoice(
+            invoice_id=invoice_id,
             session=session,
         )
-        return users_list
+    return invoice
+
+@invoice_router.get(
+    path="/get_invoices",
+    dependencies=[Depends(security)],
+    response_model=InvoicesSchema,
+)
+async def get_invoices(
+    user_id: int = Depends(chec_user_id),
+    session: AsyncSession = Depends(async_session),
+) -> InvoicesSchema:
+    invoices = await InvoiceService.get_invoices(
+        user_id=user_id,
+        session=session,
+    )
+    return invoices

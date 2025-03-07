@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.oauth import oauth
 from core.pass_hash import pass_hash
-from db.repo import UserRepo
+from db.repo.user import UserRepo
 from schemas.auth import UserAuth
 from schemas.user_schemas import UserSchema
 
