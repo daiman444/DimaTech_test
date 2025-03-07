@@ -1,11 +1,18 @@
+from datetime import datetime, timedelta
 import jwt
+from jwt import(
+    ExpiredSignatureError,
+    InvalidTokenError,
+    InvalidAlgorithmError,
+    InvalidKeyError,
+)
 
+from fastapi import HTTPException
 from fastapi.security import(
     OAuth2PasswordBearer,
 )
 
 from core.settings import oauth_settings
-from schemas.user_schemas import UserSchema
 
 
 class OAuth:
@@ -26,23 +33,51 @@ class OAuth:
     async def encode_token(
         self,
         data: dict,
-    ) -> None:
-        return jwt.encode(
-            payload=data,
-            key=self.secret_key,
-            algorithm=self.algorithm,
-        )
+    ) -> str:
+        try:
+            expire = datetime.now() + timedelta(minutes=oauth.token_expire)
+            data.update({"exp": expire})
+            return jwt.encode(
+                payload=data,
+                key=self.secret_key,
+                algorithm=self.algorithm,
+            )
+        except TypeError:
+            raise HTTPException(
+                status_code=500,
+                detail="Invalid payload",
+            )
+        except InvalidAlgorithmError:
+            raise HTTPException(
+                status_code=500,
+                detail="Unsupported JWT algorithm"
+            )
+        except InvalidKeyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Invalid key for JWT algorithm"
+            )
     
     async def decode_token(
         self,
         token: str
-    ) -> UserSchema:
-        user_data: dict = jwt.decode(
-            jwt=token,
-            key=self.secret_key,
-            algorithms=[self.algorithm],
-        )
-        return UserSchema(**user_data)
+    ) -> dict:
+        try:
+            return jwt.decode(
+                jwt=token,
+                key=self.secret_key,
+                algorithms=[self.algorithm],
+            )
+        except ExpiredSignatureError:
+            raise HTTPException(
+                status_code=401,
+                detail="Token has expired"
+            )
+        except InvalidTokenError:
+            raise HTTPException(
+                status_code=401,
+                detail="Unvalid Token"
+            )
 
 oauth = OAuth(
     secret_key=oauth_settings.OAUTH_SECRET_KEY,
