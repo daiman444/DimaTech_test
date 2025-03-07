@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from db.models import Invoice
-from schemas.invoices_schemas import InvoiceSchema
 
 
 class InvoiceRepo:
@@ -11,14 +10,18 @@ class InvoiceRepo:
     async def add_invoice(
         session: AsyncSession,
         user_id: int,
-        balance: int
+        balance: int = 0,
+        need_commit: bool | None = True,
     ) -> Invoice:
         invoice = Invoice(
             user_id=user_id,
             balance=balance,
         )
         session.add(invoice)
-        await session.commit()
+        if need_commit:
+            await session.commit()
+        else:
+            await session.flush()
         await session.refresh(invoice)
         return invoice
     
@@ -34,6 +37,20 @@ class InvoiceRepo:
             )
         )
         return result.scalars().first()
+    
+    async def update_invoice(
+        session: AsyncSession,
+        invoice_id: int,
+        amount: int = 0
+    ) -> Invoice | None:
+        invoice: Invoice = await InvoiceRepo.get_invoice(
+            session=session,
+            invoice_id=invoice_id
+        )
+        if invoice:
+            invoice.balance += amount
+            await session.flush()
+        return invoice
     
     async def get_invoices(
         session: AsyncSession,
